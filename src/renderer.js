@@ -43,6 +43,7 @@ export class Renderer {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(screenId);
     if (el) el.classList.add('active');
+    window.scrollTo(0, 0);
   }
 
   // ─── OS Selector Screen ──────────────────────────────────────
@@ -98,11 +99,21 @@ export class Renderer {
     arch.classList.remove('visible');
     btn.classList.remove('visible');
 
+    const statusEl = document.getElementById('briefingStatus');
+    const statusText = document.getElementById('briefingStatusText');
+    if (statusEl) statusEl.classList.remove('complete');
+    if (statusText) statusText.textContent = 'DECRYPTING MISSION BRIEF...';
+
     const dateEl = document.querySelector('.briefing-date');
     if (dateEl) dateEl.textContent = this.briefing.date;
 
     const classEl = document.querySelector('.briefing-classification');
     if (classEl) classEl.textContent = this.briefing.classification;
+
+    const markComplete = () => {
+      if (statusEl) statusEl.classList.add('complete');
+      if (statusText) statusText.textContent = 'TRANSMISSION COMPLETE — PROCEED WHEN READY';
+    };
 
     this._typewriterCtrl = typewriter(doc, this.briefing.lines, {
       charDelay: 18,
@@ -110,7 +121,10 @@ export class Renderer {
       onComplete: () => {
         arch.textContent = this.briefing.archDiagram.join('\n');
         arch.classList.add('visible');
-        setTimeout(() => btn.classList.add('visible'), 600);
+        setTimeout(() => {
+          btn.classList.add('visible');
+          markComplete();
+        }, 600);
       }
     });
 
@@ -120,7 +134,10 @@ export class Renderer {
         this._typewriterCtrl = null;
         arch.textContent = this.briefing.archDiagram.join('\n');
         arch.classList.add('visible');
-        setTimeout(() => btn.classList.add('visible'), 200);
+        setTimeout(() => {
+          btn.classList.add('visible');
+          markComplete();
+        }, 200);
       }
     }, { once: true });
   }
@@ -252,6 +269,7 @@ export class Renderer {
     const body = document.createElement('div');
     body.className = 'quest-body';
     body.innerHTML = quest.body;
+    this._addCopyButtons(body);
 
     if (quest.terminal) {
       const term = new Terminal(quest.terminal, questIdx, this.state);
@@ -313,6 +331,27 @@ export class Renderer {
 
     card.appendChild(body);
     return card;
+  }
+
+  _addCopyButtons(container) {
+    container.querySelectorAll('code').forEach(code => {
+      const text = code.textContent;
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn copy-btn-inline';
+      btn.textContent = 'COPY';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '✓ COPIED';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'COPY';
+            btn.classList.remove('copied');
+          }, 1500);
+        });
+      });
+      code.after(btn);
+    });
   }
 
   _toggleQuest(questIdx) {

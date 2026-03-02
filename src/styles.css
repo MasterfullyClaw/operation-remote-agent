@@ -68,7 +68,6 @@ body::after {
   max-width: 680px;
   margin: 0 auto;
   padding: 3rem 1.5rem;
-  display: flex !important;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
@@ -76,7 +75,7 @@ body::after {
 }
 
 .os-selector-screen.active {
-  display: flex !important;
+  display: flex;
 }
 
 .os-selector-header {
@@ -247,6 +246,43 @@ body::after {
   animation: crt-flicker 4s infinite;
 }
 
+.briefing-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.briefing-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cyan);
+  display: inline-block;
+  animation: pulse-cyan 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.briefing-status.complete .briefing-status-dot {
+  background: var(--green);
+  animation: none;
+}
+
+.briefing-status.complete {
+  color: var(--green);
+}
+
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(0.7); }
+}
+
 .briefing-date {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -300,37 +336,40 @@ body::after {
 .briefing-arch.visible { opacity: 1; }
 
 .begin-btn {
-  display: block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
-  max-width: 400px;
-  margin: 2rem auto 0;
-  padding: 1rem 2rem;
+  padding: 1.1rem 2rem;
   font-family: var(--font-mono);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  background: transparent;
+  background: var(--bg);
   color: var(--green);
-  border: 2px solid var(--green);
-  border-radius: 8px;
+  border: none;
+  border-top: 2px solid var(--green);
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
+  z-index: 100;
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(100%);
+  transition: opacity 0.5s ease, transform 0.5s ease, background 0.3s, color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 -4px 30px rgba(0,255,65,0.15);
 }
 .begin-btn.visible {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.6s ease, transform 0.6s ease, background 0.3s, color 0.3s, box-shadow 0.3s;
 }
 .begin-btn:hover {
   background: var(--green);
   color: var(--bg);
-  box-shadow: 0 0 30px rgba(0,255,65,0.3), 0 0 60px rgba(0,255,65,0.1);
+  box-shadow: 0 -4px 40px rgba(0,255,65,0.35);
 }
+
+/* Extra padding on briefing screen so content isn't hidden behind fixed button */
+.briefing-screen { padding-bottom: 5rem; }
 
 /* ═══════════════════════════════════════════════════════════════
    OPERATIONS HUD (MAIN GAME SCREEN)
@@ -342,6 +381,27 @@ body::after {
   padding: 2rem 1rem 1rem;
   border-bottom: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(0,255,65,0.03) 0%, transparent 100%);
+}
+
+.reset-link-fixed {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 500;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  background: var(--bg);
+  transition: color 0.2s, border-color 0.2s;
+}
+.reset-link-fixed:hover {
+  color: var(--red);
+  border-color: var(--red);
 }
 
 .header h1 {
@@ -704,6 +764,66 @@ code {
 }
 .terminal-input::placeholder { color: var(--text-muted); }
 
+/* ─── Copy Buttons ───────────────────────────────────────────── */
+
+/* In terminal hint lines */
+.term-hint-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.term-hint-cmd {
+  color: var(--cyan);
+}
+
+/* Base copy button */
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid var(--green-dim);
+  background: transparent;
+  color: var(--green);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background: var(--green-glow);
+  border-color: var(--green);
+}
+
+.copy-btn.copied {
+  background: var(--green-glow);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Inline copy buttons (next to <code> in quest body) — hidden until hover */
+.copy-btn-inline {
+  opacity: 0;
+  font-size: 0.55rem;
+  padding: 0.1rem 0.4rem;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+code:hover + .copy-btn-inline,
+.copy-btn-inline:hover,
+.copy-btn-inline.copied {
+  opacity: 1;
+}
+
 /* ─── Validation Checklist ───────────────────────────────────── */
 .validation { margin: 1rem 0; }
 
@@ -973,6 +1093,191 @@ code {
 .restart-btn:hover {
   background: var(--green-glow);
   border-color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TMUX CHEATSHEET
+   ═══════════════════════════════════════════════════════════════ */
+
+.tmux-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 500;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--cyan);
+  background: var(--bg);
+  border: 1px solid rgba(6,214,160,0.3);
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.tmux-btn:hover,
+.tmux-btn.active {
+  color: var(--bg);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+/* Overlay backdrop */
+.tmux-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 600;
+}
+.tmux-overlay.open { display: block; }
+
+/* Slide-in panel */
+.tmux-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 360px;
+  max-width: 92vw;
+  background: var(--bg-terminal);
+  border-left: 1px solid var(--border);
+  z-index: 700;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+.tmux-panel.open { transform: translateX(0); }
+
+.tmux-panel-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tmux-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tmux-panel-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--cyan);
+}
+
+.tmux-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+.tmux-close:hover { color: var(--text); }
+
+.tmux-panel-body {
+  overflow-y: auto;
+  padding: 1rem 1.25rem 2rem;
+  flex: 1;
+}
+.tmux-panel-body::-webkit-scrollbar { width: 4px; }
+.tmux-panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.tmux-section {
+  margin-bottom: 1.5rem;
+}
+
+.tmux-section-title {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tmux-section-note {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
+.tmux-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(26,42,30,0.5);
+}
+.tmux-row:last-child { border-bottom: none; }
+
+.tmux-keys {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  min-width: 130px;
+}
+
+kbd.tmux-prefix {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  background: rgba(0,255,65,0.07);
+  border: 1px solid rgba(0,255,65,0.2);
+  color: var(--green);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+kbd.tmux-key {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: rgba(6,214,160,0.08);
+  border: 1px solid rgba(6,214,160,0.25);
+  color: var(--cyan);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Terminal commands (single key = the command itself) */
+.tmux-keys kbd.tmux-key:only-child {
+  color: var(--green-bright);
+  background: rgba(0,255,65,0.05);
+  border-color: rgba(0,255,65,0.15);
+  font-size: 0.6rem;
+}
+
+.tmux-plus {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.tmux-desc {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  padding-top: 0.05rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════

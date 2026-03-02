@@ -33,6 +33,11 @@
     <div class="briefing-date"></div>
   </div>
 
+  <div class="briefing-status" id="briefingStatus">
+    <span class="briefing-status-dot"></span>
+    <span id="briefingStatusText">DECRYPTING MISSION BRIEF...</span>
+  </div>
+
   <div class="briefing-document" id="briefingDoc">
     <!-- Typewriter text injected by renderer -->
   </div>
@@ -70,9 +75,6 @@
     <!-- Quest cards injected by renderer -->
     <div id="questContainer"></div>
 
-    <div style="text-align:center; margin-top:2rem;">
-      <a href="#" id="resetLink" style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);text-decoration:none;">RESET MISSION</a>
-    </div>
   </div>
 </div>
 
@@ -95,6 +97,26 @@
   <h2 class="level-trans-title"></h2>
   <p class="level-trans-subtitle"></p>
 </div>
+
+<!-- Global fixed reset button — always visible -->
+<a href="#" id="resetLink" class="reset-link-fixed">RESET</a>
+
+<!-- Global tmux cheatsheet button -->
+<button id="tmuxBtn" class="tmux-btn">⌨ TMUX SHORTCUTS</button>
+
+<!-- Tmux cheatsheet panel -->
+<div id="tmuxPanel" class="tmux-panel">
+  <div class="tmux-panel-inner">
+    <div class="tmux-panel-header">
+      <span class="tmux-panel-title">TMUX CHEATSHEET</span>
+      <button id="tmuxClose" class="tmux-close">✕</button>
+    </div>
+    <div class="tmux-panel-body" id="tmuxPanelBody">
+      <!-- Rendered by app.js -->
+    </div>
+  </div>
+</div>
+<div id="tmuxOverlay" class="tmux-overlay"></div>
 
 <!-- App entry point -->
 <script type="module" src="app.js"></script>

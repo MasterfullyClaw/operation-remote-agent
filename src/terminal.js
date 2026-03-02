@@ -8,12 +8,25 @@ function normalizeCmd(cmd) {
   return cmd.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function makeCopyBtn(text) {
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'COPY';
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ COPIED';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'COPY';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  });
+  return btn;
+}
+
 export class Terminal {
-  /**
-   * @param {object} terminalData — { title, commands: [{ cmd, output, successMsg }] }
-   * @param {number} questIdx
-   * @param {import('./state.js').GameState} state
-   */
   constructor(terminalData, questIdx, state) {
     this.data = terminalData;
     this.questIdx = questIdx;
@@ -40,12 +53,7 @@ export class Terminal {
         <div class="terminal-title">${escapeHtml(this.data.title)}</div>
       </div>
       <div class="terminal-body">
-        ${!allDone && nextCmd
-          ? `<div class="term-line term-info">\u25b8 Type: ${escapeHtml(nextCmd.cmd)}</div>`
-          : allDone
-            ? `<div class="term-line term-info">\u25b8 Terminal objectives complete.</div>`
-            : ''
-        }
+        ${allDone ? `<div class="term-line term-info">\u25b8 Terminal objectives complete.</div>` : ''}
       </div>
       <div class="terminal-input-area">
         <div class="terminal-input-row">
@@ -62,6 +70,11 @@ export class Terminal {
     this.bodyEl = el.querySelector('.terminal-body');
     this.inputEl = el.querySelector('.terminal-input');
 
+    // Initial hint line with copy button
+    if (!allDone && nextCmd) {
+      this._appendHintLine(nextCmd.cmd);
+    }
+
     if (!allDone) {
       this.inputEl.addEventListener('keydown', (e) => this._onKeydown(e));
     }
@@ -73,6 +86,21 @@ export class Terminal {
     if (this.inputEl && !this.inputEl.disabled) {
       this.inputEl.focus();
     }
+  }
+
+  _appendHintLine(cmd) {
+    const div = document.createElement('div');
+    div.className = 'term-line term-info term-hint-line';
+
+    const text = document.createTextNode('\u25b8 Type: ');
+    const cmdSpan = document.createElement('span');
+    cmdSpan.className = 'term-hint-cmd';
+    cmdSpan.textContent = cmd;
+
+    div.appendChild(text);
+    div.appendChild(cmdSpan);
+    div.appendChild(makeCopyBtn(cmd));
+    this.bodyEl.appendChild(div);
   }
 
   _onKeydown(e) {
@@ -88,7 +116,6 @@ export class Terminal {
     this._appendLine('term-line', `<span class="term-prompt">${escapeHtml(prompt)}</span>${escapeHtml(cmd)}`);
 
     if (expected && normalizeCmd(cmd) === normalizeCmd(expected.cmd)) {
-      // Correct command
       this._appendLine('term-line term-output', expected.output);
       this._appendLine('term-line term-success', '\u2713 ' + expected.successMsg);
 
@@ -96,17 +123,14 @@ export class Terminal {
 
       const newIdx = this.state.getTerminalCmdIndex(this.questIdx);
       if (newIdx >= this.data.commands.length) {
-        // All terminal commands done
-        this._appendLine('term-line term-info', '\n\u25b8 Terminal objectives complete.');
+        this._appendLine('term-line term-info', '\u25b8 Terminal objectives complete.');
         this.inputEl.disabled = true;
         this.inputEl.placeholder = 'All commands completed';
       } else {
-        // Show next hint
-        const next = this.data.commands[newIdx];
-        this._appendLine('term-line term-info', `\n\u25b8 Type: ${next.cmd}`);
+        // Next hint with copy button
+        this._appendHintLine(this.data.commands[newIdx].cmd);
       }
     } else {
-      // Wrong command
       const hint = expected
         ? `\u2717 Try: ${expected.cmd}`
         : '\u2717 Unknown command';
@@ -120,7 +144,6 @@ export class Terminal {
   _appendLine(className, content) {
     const div = document.createElement('div');
     div.className = className;
-    // If content contains HTML spans, use innerHTML; otherwise textContent
     if (content.includes('<span')) {
       div.innerHTML = content;
     } else {
