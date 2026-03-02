@@ -1348,3 +1348,124 @@ kbd.tmux-key {
   .briefing-title { font-size: 1.1rem; letter-spacing: 0.08em; }
   .arch-diagram { font-size: 0.48rem; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SKIN SWITCHER BUTTON (active in all skins)
+   ═══════════════════════════════════════════════════════════════ */
+
+.skin-btn {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 500;
+  padding: 0.3rem 0.6rem;
+  background: var(--bg);
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.skin-btn:hover,
+.skin-btn.active {
+  color: var(--bg);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COLORFUL RETRO TERMINAL — Skin
+   Activated when <html data-skin="retro">
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Token Overrides ──────────────────────────────────────────── */
+[data-skin="retro"] {
+  --bg:             #0a0a2a;
+  --bg-card:        #1a0a3a;
+  --bg-terminal:    #0d0a2a;
+  --bg-hover:       rgba(170, 255, 68, 0.03);
+  --border:         #4a5a3e;
+  --border-active:  #aaff44;
+  --text:           #f0d060;
+  --text-dim:       #8a9060;
+  --text-muted:     #5a6040;
+  --green:          #aaff44;
+  --green-dim:      #2a4a0a;
+  --green-glow:     rgba(170, 255, 68, 0.12);
+  --green-bright:   #ccff66;
+  --orange:         #c8a050;
+  --orange-glow:    rgba(200, 160, 80, 0.12);
+  --red:            #ff4040;
+  --cyan:           #40c8a0;
+  --cyan-glow:      rgba(64, 200, 160, 0.12);
+  --terminal-green: #aaff44;
+  --font-mono:      'VT323', monospace;
+  --font-sans:      'VT323', monospace;
+}
+
+/* ── Retro Typography ─────────────────────────────────────────── */
+/* Pixel arcade font for major headings (safe ≥ 8px sizes only)  */
+[data-skin="retro"] h1,
+[data-skin="retro"] .briefing-title {
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+}
+
+[data-skin="retro"] .level-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+}
+
+/* Slight size boost — VT323 reads better at 1.1× */
+[data-skin="retro"] body {
+  font-size: 1.1em;
+  animation: crt-flicker 8s infinite;   /* reuses existing keyframe */
+}
+
+/* ── CRT Scanlines ────────────────────────────────────────────── */
+/* body::before is unused in default skin — safe to add here     */
+[data-skin="retro"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+}
+
+/* ── CRT Vignette ─────────────────────────────────────────────── */
+/* Overrides only the `background` of the default body::after    */
+/* (position, inset, pointer-events, z-index inherit from base)  */
+[data-skin="retro"] body::after {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+}
+
+/* ── Z-Index: Elevate TMUX panel above CRT layers ────────────── */
+/* CRT layers are at z-index 9999. TMUX panel must render above. */
+[data-skin="retro"] #tmuxPanel,
+[data-skin="retro"] #tmuxOverlay {
+  z-index: 10000;
+}
+
+/* Skin button stays above TMUX overlay when panel is open       */
+[data-skin="retro"] .skin-btn {
+  z-index: 10001;
+}

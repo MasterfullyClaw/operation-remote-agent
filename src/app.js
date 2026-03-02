@@ -221,10 +221,38 @@ function wireTmux() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 }
 
+// ─── Skin System ─────────────────────────────────────────────────
+const SKIN_KEY = 'remote_agent_skin';
+const SKINS = ['default', 'retro'];
+const SKIN_LABELS = { default: '◐ DEFAULT', retro: '◐ RETRO' };
+
+function applySkin(skin) {
+  document.documentElement.setAttribute('data-skin', skin);
+  localStorage.setItem(SKIN_KEY, skin);
+  const btn = document.getElementById('skinBtn');
+  if (btn) btn.textContent = SKIN_LABELS[skin] ?? '◐ ' + skin.toUpperCase();
+}
+
+function wireSkin() {
+  const btn = document.getElementById('skinBtn');
+  if (!btn) return;
+
+  // Sync button label with the skin that was already applied by the inline init script
+  const current = document.documentElement.getAttribute('data-skin') || 'default';
+  btn.textContent = SKIN_LABELS[current] ?? '◐ DEFAULT';
+
+  btn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-skin') || 'default';
+    const next = SKINS[(SKINS.indexOf(cur) + 1) % SKINS.length];
+    applySkin(next);
+  });
+}
+
 // ─── Boot ───────────────────────────────────────────────────────
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { boot(); wireTmux(); });
+  document.addEventListener('DOMContentLoaded', () => { boot(); wireTmux(); wireSkin(); });
 } else {
   boot();
   wireTmux();
+  wireSkin();
 }

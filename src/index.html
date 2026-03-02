@@ -6,6 +6,20 @@
   <title>Operation: Remote Agent</title>
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Retro skin: Google Fonts (Press Start 2P + VT323) — cached after first visit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- Skin init: runs SYNCHRONOUSLY before first paint — prevents flash of wrong skin.
+       MUST NOT be type="module" (modules are deferred and run after paint). -->
+  <script>
+    (function () {
+      var skin = localStorage.getItem('remote_agent_skin') || 'default';
+      document.documentElement.setAttribute('data-skin', skin);
+    }());
+  </script>
 </head>
 <body>
 
@@ -103,6 +117,9 @@
 
 <!-- Global tmux cheatsheet button -->
 <button id="tmuxBtn" class="tmux-btn">⌨ TMUX SHORTCUTS</button>
+
+<!-- Global skin switcher button — always visible -->
+<button id="skinBtn" class="skin-btn">◐ DEFAULT</button>
 
 <!-- Tmux cheatsheet panel -->
 <div id="tmuxPanel" class="tmux-panel">
